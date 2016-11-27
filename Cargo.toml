@@ -1,5 +1,5 @@
 [package]
-name = "proton-runner"
+name = "proton_runner"
 version = "0.0.1"
 authors = ["Ryan Fredlund <fredl027@umn.edu>", "Vladimir Kuksenko <kukse004@umn.edu>"]
 description = "Show runner for Proton"
@@ -9,3 +9,8 @@ readme = "README.md"
 license = "MIT"
 
 [dependencies]
+docopt = "0.6.*"
+sfml = "0.11.*"
+
+[[bin]]
+name = "proton_runner"
