@@ -40,9 +40,9 @@ const USAGE: &'static str = "
 Command-line interface for Proton
 
 Usage:
-  ./proton update-data <proj-name>
-  ./proton run-show
-  ./proton (-h | --help)
+  ./proton_runner update-data <proj-name>
+  ./proton_runner run-show
+  ./proton_runner (-h | --help)
 
 Options:
   -h --help     Show this screen
