@@ -1,8 +1,12 @@
+extern crate docopt;
 extern crate proton_runner;
+extern crate rustc_serialize;
 extern crate sfml;
 
+use std::env;
 use std::path::Path;
 
+use docopt::Docopt;
 use sfml::audio::{Music, SoundStatus};
 use sfml::system::{Time, sleep};
 
@@ -32,10 +36,43 @@ fn play_music(music_path: &str) -> Result<(), Error> {
     Ok(())
 }
 
+const USAGE: &'static str = "
+Command-line interface for Proton
+
+Usage:
+  ./proton update-data <proj-name>
+  ./proton (-h | --help)
+
+Options:
+  -h --help     Show this screen
+";
+
+#[derive(Debug, RustcDecodable)]
+struct Args {
+    arg_proj_name: Option<String>,
+}
+
 fn main() {
-    match play_music("Music/(1) Jingle Breaks.ogg") {
-        Ok(_) => println!("Worked!"),
-        Err(e) => println!("{}", e)
+    let args: Args = Docopt::new(USAGE)
+        .and_then(|d| d.decode())
+        .unwrap_or_else(|e| e.exit());
+
+    // Below unwrap()'s are safe within Docopt's usage rules
+
+    let command: fn(Args) -> Result<(), Error> = match env::args().nth(1).unwrap().as_ref() {
+        "update-data" => run_update_data,
+        _ => panic!("Invalid first argument"),
     };
+
+    let result = command(args);
+    match result {
+        Ok(_) => println!("Worked!"),
+        Err(e) => println!("{:?}", e.to_string()),
+    };
+}
+
+fn run_update_data(args: Args) -> Result<(), Error> {
+    let proj_name = args.arg_proj_name.unwrap();
+    proton_runner::data::update_data(&proj_name)
 }
 
