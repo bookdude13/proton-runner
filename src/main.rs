@@ -15,7 +15,7 @@ Command-line interface for Proton
 
 Usage:
   ./proton_runner update-data <proj-name>
-  ./proton_runner run-show <proj-name>
+  ./proton_runner run-show <proj-name> <dmx-port>
   ./proton_runner (-h | --help)
 
 Options:
@@ -25,6 +25,7 @@ Options:
 #[derive(Debug, RustcDecodable)]
 struct Args {
     arg_proj_name: Option<String>,
+    arg_dmx_port: Option<String>,
 }
 
 fn main() {
@@ -54,6 +55,7 @@ fn run_update_data(args: Args) -> Result<(), Error> {
 
 fn run_run_show(args: Args) -> Result<(), Error> {
     let proj_name = args.arg_proj_name.unwrap();
-    proton_runner::runner::run_show(&proj_name)
+    let dmx_port = args.arg_dmx_port.unwrap();
+    proton_runner::runner::run_show(&dmx_port, &proj_name)
 }
 
