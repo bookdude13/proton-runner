@@ -4,11 +4,8 @@ extern crate rustc_serialize;
 extern crate sfml;
 
 use std::env;
-use std::path::Path;
 
 use docopt::Docopt;
-use sfml::audio::{Music, SoundStatus};
-use sfml::system::{Time, sleep};
 
 use proton_runner::error::Error;
 
