@@ -6,22 +6,26 @@ use std::time::Duration;
 use sfml::audio::{Music, SoundStatus};
 use sfml::system::{Time, sleep};
 
+use DmxOutput;
 use error::Error;
 use types::{Playlist, PlaylistItem, SequenceData};
 use utils;
 
 
-fn play_sequence(seq_path: &str, seq_music: &str) -> Result<(), Error> {
+fn play_sequence(dmx: &mut DmxOutput, seq_path: &str, seq_music: &str) -> Result<(), Error> {
+    println!("Sequence!");
     // Check that paths actually exist
     try!(utils::check_path(seq_path));
     try!(utils::check_path(seq_music));
-    play_pattern(seq_path)
+    play_pattern(dmx, seq_path)
 }
 
-fn play_pattern(pattern_path: &str) -> Result<(), Error> {
+fn play_pattern(dmx: &mut DmxOutput, pattern_path: &str) -> Result<(), Error> {
+    println!("Pattern!");
     // Check that path actually exists
     try!(utils::check_path(pattern_path));
 
+    println!("\tReading pattern from file");
     // Read in pattern/music-less sequence
     let pattern_json = try!(utils::file_as_string(&pattern_path));
     let pattern: SequenceData = try!(json::decode(&pattern_json).map_err(Error::JsonDecode));
@@ -31,6 +35,7 @@ fn play_pattern(pattern_path: &str) -> Result<(), Error> {
         return Err(Error::InvalidDataLength(pattern.data.len() as u32, pattern.num_frames));
     }
 
+    println!("\tRunning...");
     // Create channels for clock thread tx/rx
     let (tx, rx) = mpsc::channel();
 
@@ -51,13 +56,17 @@ fn play_pattern(pattern_path: &str) -> Result<(), Error> {
     // Output every frame
     for frame in rx.iter() {
         let data = &pattern.data[frame as usize];
-        // send data
+        match dmx.send(data) {
+            Ok(_) => (),
+            Err(e) => println!("\tError: {}", e),
+        }
     }
-
-    Err(Error::TodoErr)
+    println!("Done.");
+    Ok(())
 }
 
 fn play_music(music_path: &str) -> Result<(), Error> {
+    println!("Music!");
     // Check that path actually exists
     try!(utils::check_path(music_path));
 
@@ -80,14 +89,15 @@ fn play_music(music_path: &str) -> Result<(), Error> {
 }
 
 fn play_delay(delay: u32) -> Result<(), Error> {
+    println!("Delay!");
     Err(Error::TodoErr)
 }
 
-fn run_item(item: PlaylistItem) -> Result<(), Error> {
+fn run_item(dmx: &mut DmxOutput, item: PlaylistItem) -> Result<(), Error> {
     match item.path {
         Some(path) => match item.music {
-            Some(music) => play_sequence(&path, &music),
-            None => play_pattern(&path),
+            Some(music) => play_sequence(dmx, &path, &music),
+            None => play_pattern(dmx, &path),
         },
         None => match item.music {
             Some(music) => play_music(&music),
@@ -96,17 +106,27 @@ fn run_item(item: PlaylistItem) -> Result<(), Error> {
     }
 }
 
-pub fn run_show(proj_name: &str) -> Result<(), Error> {
+pub fn run_show(dmx_port: &str, proj_name: &str) -> Result<(), Error> {
+
+    println!("Creating DMX outputter");
+    // Create dmx outputter
+    let mut dmx = try!(DmxOutput::new(dmx_port));
+
+    println!("Reading playlist");
     // Build playlist file path
     let mut plist_path = "Playlists/".to_string();
     plist_path.push_str(&proj_name);
     plist_path.push_str(&".json");
+
     // Read playlist
     let plist_json = try!(utils::file_as_string(&plist_path));
     let plist: Playlist = try!(json::decode(&plist_json).map_err(Error::JsonDecode));
+
+    println!("Starting the show!");
     // Play playlist
-    for plist_item in plist.items {
-        try!(run_item(plist_item));
+    for (item_idx, plist_item) in plist.items.into_iter().enumerate() {
+        print!("Running item {}...", item_idx);
+        try!(run_item(&mut dmx, plist_item));
     }
     Ok(())
 }

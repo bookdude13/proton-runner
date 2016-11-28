@@ -1,8 +1,10 @@
 use rustc_serialize::json;
+use rserial;
 use std::{io, error, fmt};
 
 #[derive(Debug)]
 pub enum Error {
+    DmxTooLong(usize),
     EmptyData,
     FolderNotEmpty(String, usize),
     InvalidDataLength(u32, u32),
@@ -15,12 +17,14 @@ pub enum Error {
     PathNotFound(String),
     ProtonCli(String),
     Rsfml(String),
+    Serial(rserial::Error),
     TodoErr,
 }
 
 impl error::Error for Error {
     fn description(&self) -> &str {
         match *self {
+            Error::DmxTooLong(_) => "DMX data too long to send",
             Error::EmptyData => "Empty data vector provided",
             Error::FolderNotEmpty(_, _) => "Root folder was not empty",
             Error::Io(_) => "IO error occurred",
@@ -33,12 +37,14 @@ impl error::Error for Error {
             Error::PathNotFound(_) => "Path was not found",
             Error::ProtonCli(_) => "proton_cli error occurred",
             Error::Rsfml(_) => "Rsfml error occurred",
+            Error::Serial(_) => "Serial error occurred",
             Error::TodoErr => "Todo",
         }
     }
 
     fn cause(&self) -> Option<&error::Error> {
         match *self {
+            Error::DmxTooLong(_) => None,
             Error::EmptyData => None,
             Error::FolderNotEmpty(_, _) => None,
             Error::InvalidDataLength(_, _) => None,
@@ -51,6 +57,7 @@ impl error::Error for Error {
             Error::PathNotFound(_) => None,
             Error::ProtonCli(_) => None,
             Error::Rsfml(_) => None,
+            Error::Serial(ref err) => Some(err),
             Error::TodoErr => None,
        }
    }
@@ -59,6 +66,8 @@ impl error::Error for Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
+            Error::DmxTooLong(ref length) => write!(f,
+                "DMX data too long to send. Length: {}", length),
             Error::EmptyData => write!(f,
                 "Data provided was empty"),
             Error::FolderNotEmpty(ref root, count) => write!(f,
@@ -83,6 +92,8 @@ impl fmt::Display for Error {
                 "proton_cli error: {}", description),
             Error::Rsfml(ref description) => write!(f, 
                 "Rsfml error: {}", description),
+            Error::Serial(ref err) => write!(f,
+                "Serial error occured: {}", err),
             Error::TodoErr => write!(f, "TodoErr"),
         }
     }
