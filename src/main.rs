@@ -79,6 +79,7 @@ fn run_update_data(args: Args) -> Result<(), Error> {
 }
 
 fn run_run_show(args: Args) -> Result<(), Error> {
-    proton_runner::runner::run_show()
+    let proj_name = args.arg_proj_name.unwrap();
+    proton_runner::runner::run_show(&proj_name)
 }
 
