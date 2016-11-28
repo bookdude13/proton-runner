@@ -6,6 +6,7 @@ use std::str;
 
 use error::Error;
 use types::{Playlist, PlaylistItem, SequenceData};
+use utils;
 
 
 /// Get the sequence data from proton_cli
@@ -34,7 +35,24 @@ fn get_data(proj_name: &str) -> Result<Vec<SequenceData>, Error> {
     let plist_data: Vec<SequenceData> = try!(
         json::decode(plist_data_json).map_err(Error::JsonDecode));
 
-    Ok(plist_data)
+    // Transpose data to frame-major order for easier use later
+    let transposed_data = plist_data.into_iter()
+        .map(|seq_data| {
+            println!("num_frames: {}", seq_data.num_frames);
+            let transposed_data = match utils::transpose_data(seq_data.data) {
+                Ok(data) => data,
+                Err(e) => panic!(e),
+            };
+            SequenceData {
+                name: seq_data.name,
+                music_file: seq_data.music_file,
+                frame_dur_ms: seq_data.frame_dur_ms,
+                num_frames: seq_data.num_frames,
+                data: transposed_data
+            }
+        }).collect::<Vec<SequenceData>>();
+
+    Ok(transposed_data)
 }
 
 /// Update the local copy of the show's sequence data
@@ -55,18 +73,24 @@ pub fn update_data(proj_name: &str) -> Result<(), Error> {
         let mut seq_output_path = proj_name.to_string() + "/";
         seq_output_path.push_str(&sequence_data.name);
         seq_output_path.push_str(&".json");
-        // Build music file path
-        let mut seq_music_path = "Music/".to_string();
-        seq_music_path.push_str(&sequence_data.music_file);
+
+        // Build music file path if it exists
+        let seq_music_path = sequence_data.music_file.clone().map(|music_file| {
+            let mut mus_path = "Music/".to_string();
+            mus_path.push_str(&music_file);
+            mus_path
+        });
+
         // Save sequence data to file
         let data_json = try!(json::encode(&sequence_data).map_err(Error::JsonEncode));
         try!(File::create(&seq_output_path)
             .and_then(|mut f| f.write(data_json.as_bytes()))
             .map_err(Error::Io));
+
         // Add to playlist
         let plist_item = try!(PlaylistItem::new(
             Some(seq_output_path),
-            Some(seq_music_path),
+            seq_music_path,
             None::<u32>));
         plist_items.push(plist_item);
     }
@@ -74,10 +98,12 @@ pub fn update_data(proj_name: &str) -> Result<(), Error> {
     let mut plist_path = "Playlists/".to_string();
     plist_path.push_str(&proj_name);
     plist_path.push_str(&".json");
+
     // Make playlist object
     let plist = Playlist {
         items: plist_items
     };
+
     // Write playlist to file
     let plist_json = try!(json::encode(&plist).map_err(Error::JsonEncode));
     try!(File::create(&plist_path)

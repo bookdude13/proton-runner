@@ -1,23 +1,65 @@
 use rustc_serialize::json;
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+use sfml::audio::{Music, SoundStatus};
+use sfml::system::{Time, sleep};
 
 use error::Error;
-use types::{Playlist, PlaylistItem};
+use types::{Playlist, PlaylistItem, SequenceData};
 use utils;
 
 
 fn play_sequence(seq_path: &str, seq_music: &str) -> Result<(), Error> {
-    Err(Error::TodoErr)
+    // Check that paths actually exist
+    try!(utils::check_path(seq_path));
+    try!(utils::check_path(seq_music));
+    play_pattern(seq_path)
 }
 
 fn play_pattern(pattern_path: &str) -> Result<(), Error> {
+    // Check that path actually exists
+    try!(utils::check_path(pattern_path));
+
+    // Read in pattern/music-less sequence
+    let pattern_json = try!(utils::file_as_string(&pattern_path));
+    let pattern: SequenceData = try!(json::decode(&pattern_json).map_err(Error::JsonDecode));
+
+    // Make sure there is data for each frame
+    if pattern.data.len() != pattern.num_frames as usize {
+        return Err(Error::InvalidDataLength(pattern.data.len() as u32, pattern.num_frames));
+    }
+
+    // Create channels for clock thread tx/rx
+    let (tx, rx) = mpsc::channel();
+
+    // Spawn timer that ticks once per frame until all frames have been ticked
+    let num_frames = pattern.num_frames;
+    let frame_dur = pattern.frame_dur_ms as u64;
+    let mut curr_frame = 0;
+    thread::spawn(move || {
+        while curr_frame != num_frames {
+            // TODO maybe map the unwrap error to Error type
+            tx.send(curr_frame).unwrap();
+            curr_frame += 1;
+            thread::sleep(Duration::from_millis(frame_dur));
+        }
+        
+    });
+
+    // Output every frame
+    for frame in rx.iter() {
+        let data = &pattern.data[frame as usize];
+        // send data
+    }
+
     Err(Error::TodoErr)
 }
 
 fn play_music(music_path: &str) -> Result<(), Error> {
     // Check that path actually exists
-    if !Path::new(music_path).exists() {
-        return Err(Error::PathNotFound(music_path.to_string()));
-    }
+    try!(utils::check_path(music_path));
 
     // Create music object
     let mut music = match Music::new_from_file(music_path) {
