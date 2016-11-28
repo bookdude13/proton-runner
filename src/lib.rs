@@ -3,5 +3,6 @@ extern crate sfml;
 
 pub mod data;
 pub mod error;
+pub mod runner;
 pub mod types;
 

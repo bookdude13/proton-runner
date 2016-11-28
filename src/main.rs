@@ -41,6 +41,7 @@ Command-line interface for Proton
 
 Usage:
   ./proton update-data <proj-name>
+  ./proton run-show
   ./proton (-h | --help)
 
 Options:
@@ -61,6 +62,7 @@ fn main() {
 
     let command: fn(Args) -> Result<(), Error> = match env::args().nth(1).unwrap().as_ref() {
         "update-data" => run_update_data,
+        "run-show" => run_run_show,
         _ => panic!("Invalid first argument"),
     };
 
@@ -74,5 +76,9 @@ fn main() {
 fn run_update_data(args: Args) -> Result<(), Error> {
     let proj_name = args.arg_proj_name.unwrap();
     proton_runner::data::update_data(&proj_name)
+}
+
+fn run_run_show(args: Args) -> Result<(), Error> {
+    proton_runner::runner::run_show()
 }
 
