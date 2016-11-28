@@ -13,8 +13,28 @@ fn play_pattern(pattern_path: &str) -> Result<(), Error> {
     Err(Error::TodoErr)
 }
 
-fn play_music(mus_path: &str) -> Result<(), Error> {
-    Err(Error::TodoErr)
+fn play_music(music_path: &str) -> Result<(), Error> {
+    // Check that path actually exists
+    if !Path::new(music_path).exists() {
+        return Err(Error::PathNotFound(music_path.to_string()));
+    }
+
+    // Create music object
+    let mut music = match Music::new_from_file(music_path) {
+        Some(m) => m,
+        None => return Err(Error::MusicError("Creating rsfml music object failed".to_string()))
+    };
+
+    // Play music
+    music.play();
+
+    // Loop until done playing
+    while music.get_status() == SoundStatus::Playing {
+        // Leave some CPU time for other processes
+        sleep(Time::with_milliseconds(100));
+    }
+
+    Ok(())
 }
 
 fn play_delay(delay: u32) -> Result<(), Error> {
