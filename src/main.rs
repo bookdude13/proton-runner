@@ -41,7 +41,7 @@ Command-line interface for Proton
 
 Usage:
   ./proton_runner update-data <proj-name>
-  ./proton_runner run-show
+  ./proton_runner run-show <proj-name>
   ./proton_runner (-h | --help)
 
 Options:

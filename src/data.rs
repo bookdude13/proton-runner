@@ -5,7 +5,7 @@ use std::process::Command;
 use std::str;
 
 use error::Error;
-use types::SequenceData;
+use types::{Playlist, PlaylistItem, SequenceData};
 
 
 /// Get the sequence data from proton_cli
@@ -22,25 +22,17 @@ fn get_data(proj_name: &str) -> Result<Vec<SequenceData>, Error> {
     if err_str.len() != 0 {
         return Err(Error::ProtonCli(err_str.to_string()));
     }
-
+    
     // Make sure data starts like JSON
-    let plist_data_json = str::from_utf8(&output.stdout).expect("Playlist data not valid UTF-8");
-    if &plist_data_json[0..3] != "[[[" {
+    let plist_data_json = str::from_utf8(&output.stdout).expect("Playlist data not valid UTF-8").trim();
+    if &plist_data_json[0..2] != "[{" {
         return Err(Error::ProtonCli("Returned data not valid: ".to_string() + plist_data_json));
     }
 
     // get-playlist-data outputs just the JSON playlist data (as of 11/27/2016),
     // so we just grab the output and call it good
-    let plist_data_raw: Vec<Vec<Vec<u16>>> = try!(
+    let plist_data: Vec<SequenceData> = try!(
         json::decode(plist_data_json).map_err(Error::JsonDecode));
-
-    // Make SequenceData objects out of the raw data
-    // Give a generic name for now
-    let plist_data = plist_data_raw.into_iter().enumerate()
-        .map(|(idx, seq_data)| SequenceData {
-            name: "Sequence".to_string() + &idx.to_string(),
-            data: seq_data
-        }).collect::<Vec<SequenceData>>();
 
     Ok(plist_data)
 }
@@ -50,19 +42,47 @@ pub fn update_data(proj_name: &str) -> Result<(), Error> {
     // Get new data
     let new_data = try!(get_data(proj_name));
 
-    // Make SequenceData directory if it doesn't exist
-    let _ = fs::create_dir("SequenceData");
+    // Make project directory if it doesn't exist
+    let _ = fs::create_dir(proj_name);
 
-    // Write new data to files for offline use
+    // Make Playlists directory if it doesn't exist
+    let _ = fs::create_dir("Playlists");
+
+    // Write new data to files for offline use and save to playlist
+    let mut plist_items = Vec::new();
     for sequence_data in new_data {
-        let mut output_path = "SequenceData/".to_string();
-        output_path.push_str(&sequence_data.name);
-        output_path.push_str(&".json");
-        let data_json = try!(json::encode(&sequence_data.data).map_err(Error::JsonEncode));
-        try!(File::create(&output_path)
+        // Build sequence data path
+        let mut seq_output_path = proj_name.to_string() + "/";
+        seq_output_path.push_str(&sequence_data.name);
+        seq_output_path.push_str(&".json");
+        // Build music file path
+        let mut seq_music_path = "Music/".to_string();
+        seq_music_path.push_str(&sequence_data.music_file);
+        // Save sequence data to file
+        let data_json = try!(json::encode(&sequence_data).map_err(Error::JsonEncode));
+        try!(File::create(&seq_output_path)
             .and_then(|mut f| f.write(data_json.as_bytes()))
             .map_err(Error::Io));
+        // Add to playlist
+        let plist_item = try!(PlaylistItem::new(
+            Some(seq_output_path),
+            Some(seq_music_path),
+            None::<u32>));
+        plist_items.push(plist_item);
     }
+    // Build playlist file path
+    let mut plist_path = "Playlists/".to_string();
+    plist_path.push_str(&proj_name);
+    plist_path.push_str(&".json");
+    // Make playlist object
+    let plist = Playlist {
+        items: plist_items
+    };
+    // Write playlist to file
+    let plist_json = try!(json::encode(&plist).map_err(Error::JsonEncode));
+    try!(File::create(&plist_path)
+        .and_then(|mut f| f.write(plist_json.as_bytes()))
+        .map_err(Error::Io));
 
     Ok(())
 }
