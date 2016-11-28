@@ -4,6 +4,7 @@ use std::{io, error, fmt};
 #[derive(Debug)]
 pub enum Error {
     FolderNotEmpty(String, usize),
+    InvalidPlaylistItem(String),
     Io(io::Error),
     JsonDecode(json::DecoderError),
     JsonEncode(json::EncoderError),
@@ -19,6 +20,7 @@ impl error::Error for Error {
         match *self {
             Error::FolderNotEmpty(_, _) => "Root folder was not empty",
             Error::Io(_) => "IO error occurred",
+            Error::InvalidPlaylistItem(_) => "Invalid playlist item",
             Error::JsonDecode(_) => "Json decoding error occurred",
             Error::JsonEncode(_) => "Json encoding error occurred",
             Error::MusicError(_) => "Music-related error occurred",
@@ -32,6 +34,7 @@ impl error::Error for Error {
     fn cause(&self) -> Option<&error::Error> {
         match *self {
             Error::FolderNotEmpty(_, _) => None,
+            Error::InvalidPlaylistItem(_) => None,
             Error::Io(ref err) => Some(err),
             Error::JsonDecode(ref err) => Some(err),
             Error::JsonEncode(ref err) => Some(err),
@@ -49,6 +52,8 @@ impl fmt::Display for Error {
         match *self {
             Error::FolderNotEmpty(ref root, count) => write!(f,
                 "{} was not empty: {} files exist", root, count),
+            Error::InvalidPlaylistItem(ref item) => write!(f,
+                "Invalid playlist item: {}", item),
             Error::Io(ref err) => write!(f,
                 "IO error occurred: {}", error::Error::description(err)),
             Error::JsonDecode(ref err) => write!(f,
