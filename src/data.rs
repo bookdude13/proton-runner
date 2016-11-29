@@ -11,6 +11,9 @@ use utils;
 
 /// Get the sequence data from proton_cli
 fn get_data(proj_name: &str) -> Result<Vec<SequenceData>, Error> {
+    
+    println!("Getting data from proton_cli...");
+
     // ./proton_cli get-playlist-data <proj-name>
     let output = try!(Command::new("./proton_cli")
         .arg("get-playlist-data")
@@ -18,6 +21,7 @@ fn get_data(proj_name: &str) -> Result<Vec<SequenceData>, Error> {
         .output()
         .map_err(|_| Error::ProtonCli("Failed to run proton_cli process".to_string())));
 
+    println!("Checking data for errors...");
     // Make sure no error thrown
     let err_str = str::from_utf8(&output.stderr).expect("Data not valid UTF-8");
     if err_str.len() != 0 {
@@ -30,11 +34,13 @@ fn get_data(proj_name: &str) -> Result<Vec<SequenceData>, Error> {
         return Err(Error::ProtonCli("Returned data not valid: ".to_string() + plist_data_json));
     }
 
+    println!("Parse JSON...");
     // get-playlist-data outputs just the JSON playlist data (as of 11/27/2016),
     // so we just grab the output and call it good
     let plist_data: Vec<SequenceData> = try!(
         json::decode(plist_data_json).map_err(Error::JsonDecode));
 
+    println!("Transposing data...");
     // Transpose data to frame-major order for easier use later
     let transposed_data = plist_data.into_iter()
         .map(|seq_data| {
@@ -52,6 +58,7 @@ fn get_data(proj_name: &str) -> Result<Vec<SequenceData>, Error> {
             }
         }).collect::<Vec<SequenceData>>();
 
+    println!("Done");
     Ok(transposed_data)
 }
 

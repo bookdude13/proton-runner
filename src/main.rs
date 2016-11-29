@@ -3,7 +3,7 @@ extern crate proton_runner;
 extern crate rustc_serialize;
 extern crate sfml;
 
-use std::env;
+use std::{env, io};
 
 use docopt::Docopt;
 
@@ -55,9 +55,19 @@ fn run_update_data(args: Args) -> Result<(), Error> {
 }
 
 fn run_run_show(args: Args) -> Result<(), Error> {
+    // Prepare show
     let proj_name = args.arg_proj_name.unwrap();
     let dmx_port = args.arg_dmx_port.unwrap();
     let show = try!(Show::new(&proj_name, &dmx_port));
-    show.run()
+    println!("Ready!");
+
+    // Wait for user to run
+    let mut input = String::new();
+    try!(io::stdin().read_line(&mut input).map_err(Error::Io));
+    match input.trim() {
+        "run" => show.run(),
+        "quit" => Ok(()),
+        _ => Ok(println!("Invalid command (must be run or quit)"))
+    }
 }
 
