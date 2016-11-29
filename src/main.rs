@@ -8,6 +8,7 @@ use std::env;
 use docopt::Docopt;
 
 use proton_runner::error::Error;
+use proton_runner::types::Show;
 
 
 const USAGE: &'static str = "
@@ -56,6 +57,7 @@ fn run_update_data(args: Args) -> Result<(), Error> {
 fn run_run_show(args: Args) -> Result<(), Error> {
     let proj_name = args.arg_proj_name.unwrap();
     let dmx_port = args.arg_dmx_port.unwrap();
-    proton_runner::runner::run_show(&dmx_port, &proj_name)
+    let show = try!(Show::new(&proj_name, &dmx_port));
+    show.run()
 }
 
