@@ -5,7 +5,7 @@ use std::time::Duration;
 use DmxOutput;
 use error::Error;
 use types::SequenceData;
-use utils;
+
 
 pub struct Pattern {
     pattern: SequenceData

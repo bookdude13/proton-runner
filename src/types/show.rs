@@ -1,11 +1,8 @@
 use rustc_serialize::json;
-use std::sync::mpsc;
-use std::thread;
-use std::time::Duration;
 
 use DmxOutput;
 use error::Error;
-use types::{Delay, Music, Pattern, Playlist, PlaylistItem, PreparedPlaylistItem, Sequence, SequenceData};
+use types::{Playlist, PreparedPlaylistItem};
 use utils;
 
 
@@ -15,7 +12,7 @@ pub struct Show {
 }
 
 impl Show {
-    pub fn new(dmx_port: &str, proj_name: &str) -> Result<Show, Error> {
+    pub fn new(proj_name: &str, dmx_port: &str) -> Result<Show, Error> {
         
         println!("Creating DMX outputter");
         // Create dmx outputter
