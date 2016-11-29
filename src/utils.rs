@@ -2,7 +2,28 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
+use rustc_serialize::json;
+
 use error::Error;
+use types::SequenceData;
+
+
+/// Get sequence data from file
+pub fn load_sequence_data(path: &str) -> Result<SequenceData, Error> {
+
+    println!("\tReading sequence data from file");
+
+    // Read sequence data
+    let data_json = try!(file_as_string(path));
+    let data: SequenceData = try!(json::decode(&data_json).map_err(Error::JsonDecode));
+
+    // Make sure there is data for each frame
+    if data.data.len() != data.num_frames as usize {
+        Err(Error::InvalidDataLength(data.data.len() as u32, data.num_frames))
+    } else {
+        Ok(data)
+    }
+}
 
 
 /// Transposes data from channel-major to frame-major
@@ -35,7 +56,7 @@ pub fn check_path(path: &str) -> Result<(), Error> {
 
 /// Reads a file as a string.
 /// Wraps Read::read_to_string errors in proton_cli::Error
-pub fn file_as_string<P: AsRef<Path>>(path: P) -> Result<String, Error> {
+pub fn file_as_string(path: &str) -> Result<String, Error> {
     File::open(path)
         .and_then(|mut file| {
             let mut string = String::new();

@@ -3,10 +3,10 @@ use std::io::Write;
 use error::Error;
 use rserial;
 
-
 pub struct DmxOutput {
     serial: rserial::SystemPort
 }
+
 
 impl DmxOutput {
     /// Create a new Dmx outputter for a device located at port
