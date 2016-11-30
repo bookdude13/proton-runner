@@ -46,6 +46,7 @@ impl Sequence {
 
                 // TODO maybe map the unwrap error to Error type
                 clock_tx.send(curr_frame).unwrap();
+                curr_frame += 1;
             }            
         });
 
@@ -66,16 +67,16 @@ impl Sequence {
                 return Ok(());
             }
 
-            // Sync every so often
-            if frame % check_frame == 0 {
-                let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
-                curr_frame = real_frame;
-                if real_frame != curr_frame {
-                    println!("Adjusting frame {} to {}", curr_frame, real_frame);
-                }
-            } else {
-                curr_frame += 1;
-            }
+            // // Sync every so often
+            // if frame % check_frame == 0 {
+            //     let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
+            //     curr_frame = real_frame;
+            //     if real_frame != curr_frame {
+            //         println!("Adjusting frame {} to {}", curr_frame, real_frame);
+            //     }
+            // } else {
+            //     curr_frame += 1;
+            // }
         }
         println!("Done.");
         Ok(())
