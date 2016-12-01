@@ -20,7 +20,7 @@ impl Sequence {
         let (end_tx, end_rx) = mpsc::channel();
 
         // Re-sync music and sequence every x frames
-        let check_frame = 10;
+        let check_frame = 50;
 
         // Spawn timer that ticks once per frame until all frames have been ticked
         let num_frames = data.num_frames;
@@ -59,6 +59,16 @@ impl Sequence {
 
         // Output every frame (assuming this takes less than frame_dur time)
         for frame in clock_rx.iter() {
+
+            // Sync every so often
+            if frame % check_frame == 0 {
+                let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
+                if real_frame != curr_frame {
+                    println!("Lag! Real frame: {}, curr_frame: {}", real_frame, curr_frame);
+                    curr_frame = real_frame;
+                }
+            }
+
             let d = &data.data[frame as usize];
             match dmx.send(d) {
                 Ok(_) => (),
@@ -81,15 +91,6 @@ impl Sequence {
 
                 // Done, so finish
                 return Ok(());
-            }
-
-            // Sync every so often
-            if frame % check_frame == 0 {
-                let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
-                if real_frame != curr_frame {
-                    println!("Lag! Real frame: {}, curr_frame: {}", real_frame, curr_frame);
-                    // curr_frame = real_frame + 1;
-                }
             }
         }
         
