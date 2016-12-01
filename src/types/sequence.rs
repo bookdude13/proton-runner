@@ -33,9 +33,8 @@ impl Sequence {
         music.play();
 
         let clock_thread = thread::spawn(move || {
-            while curr_frame < num_frames {
-                thread::sleep(Duration::from_millis(frame_dur));
-                
+            loop {
+                // Check to see if told to terminate
                 match end_rx.try_recv() {
                     Ok(_) | Err(mpsc::TryRecvError::Disconnected) => {
                         println!("Terminating.");
@@ -44,11 +43,16 @@ impl Sequence {
                     Err(mpsc::TryRecvError::Empty) => {}
                 }
 
+                // Tick curr_frame, dying if receiving end terminated
                 match clock_tx.send(curr_frame) {
                     Ok(_) => {},
                     Err(_) => { println!("Terminating."); }
                 };
 
+                // Sleep for frame duration
+                thread::sleep(Duration::from_millis(frame_dur));
+                
+                // Increment current frame
                 curr_frame += 1;
             }
         });
@@ -61,30 +65,34 @@ impl Sequence {
                 Err(e) => println!("\tError: {}", e),
             }
 
-            if music.get_status() == audio::SoundStatus::Stopped {
+            // Stop when music done or past last frame
+            if music.get_status() == audio::SoundStatus::Stopped || curr_frame >= num_frames {
+                // Tell clock thread to stop
                 match end_tx.send(0) {
                     Ok(_) => {},
                     Err(_) => { println!("Clock already terminated."); }
                 };
 
+                // Let clock thread exit cleanly (wait for it)
                 match clock_thread.join() {
                     Ok(_) => {},
                     Err(e) => { println!("Clock thread panicked with error: {:?}", e); },
                 };
+
+                // Done, so finish
                 return Ok(());
             }
 
-            // // Sync every so often
-            // if frame % check_frame == 0 {
-            //     let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
-            //     curr_frame = real_frame;
-            //     if real_frame != curr_frame {
-            //         println!("Adjusting frame {} to {}", curr_frame, real_frame);
-            //     }
-            // } else {
-            //     curr_frame += 1;
-            // }
+            // Sync every so often
+            if frame % check_frame == 0 {
+                let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
+                if real_frame != curr_frame {
+                    println!("Lag! Real frame: {}, curr_frame: {}", real_frame, curr_frame);
+                    // curr_frame = real_frame + 1;
+                }
+            }
         }
+        
         println!("Done.");
         Ok(())
     }
