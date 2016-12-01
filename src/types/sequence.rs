@@ -44,10 +44,13 @@ impl Sequence {
                     Err(mpsc::TryRecvError::Empty) => {}
                 }
 
-                // TODO maybe map the unwrap error to Error type
-                clock_tx.send(curr_frame).unwrap();
+                match clock_tx.send(curr_frame) {
+                    Ok(_) => {},
+                    Err(_) => { println!("Terminating."); }
+                };
+
                 curr_frame += 1;
-            }            
+            }
         });
 
         // Output every frame (assuming this takes less than frame_dur time)
@@ -59,7 +62,11 @@ impl Sequence {
             }
 
             if music.get_status() == audio::SoundStatus::Stopped {
-                end_tx.send(0).unwrap();
+                match end_tx.send(0) {
+                    Ok(_) => {},
+                    Err(_) => { println!("Clock already terminated."); }
+                };
+
                 match clock_thread.join() {
                     Ok(_) => {},
                     Err(e) => { println!("Clock thread panicked with error: {:?}", e); },
