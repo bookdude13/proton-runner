@@ -58,7 +58,6 @@ fn get_data(proj_name: &str) -> Result<Vec<SequenceData>, Error> {
             }
         }).collect::<Vec<SequenceData>>();
 
-    println!("Done");
     Ok(transposed_data)
 }
 
