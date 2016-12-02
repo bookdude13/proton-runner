@@ -16,13 +16,13 @@ const USAGE: &'static str = "
 Command-line interface for Proton
 
 Usage:
-  ./proton_runner addPlaylistItem <proj-name> <plist-idx> [--seq=<seq-path>] [--music=<music-path>] [--dur=<duration>]
-  ./proton_runner allOn <dmx-port>
-  ./proton_runner allOff <dmx-port>
-  ./proton_runner getPlaylist <proj-name>
-  ./proton_runner set <dmx-chan> <(on|off)> <dmx-port>
-  ./proton_runner rangeOn <chan-start> <chan-end> <dmx-port>
-  ./proton_runner rangeOff <chan-start> <chan-end> <dmx-port>
+  ./proton_runner add-playlist-item <proj-name> <plist-idx> [--seq=<seq-path>] [--music=<music-path>] [--dur=<duration>]
+  ./proton_runner allon <dmx-port>
+  ./proton_runner alloff <dmx-port>
+  ./proton_runner get-playlist <proj-name>
+  ./proton_runner set <dmx-chan> (on | off) <dmx-port>
+  ./proton_runner rangeon <chan-start> <chan-end> <dmx-port>
+  ./proton_runner rangeoff <chan-start> <chan-end> <dmx-port>
   ./proton_runner run-show <proj-name> <dmx-port>
   ./proton_runner update-data <proj-name>
   ./proton_runner (-h | --help)
@@ -40,10 +40,10 @@ struct Args {
     arg_chan_end: Option<u32>,
     arg_dmx_chan: Option<u32>,
     arg_dmx_port: Option<String>,
-    arg_on: Option<bool>,
-    arg_off: Option<bool>,
     arg_plist_idx: Option<u32>,
     arg_proj_name: Option<String>,
+    cmd_on: bool,
+    cmd_off: bool,
     flag_dur: Option<u32>,
     flag_music: Option<String>,
     flag_seq: Option<String>,
@@ -57,13 +57,13 @@ fn main() {
     // Below unwrap()'s are safe within Docopt's usage rules
 
     let command: fn(Args) -> Result<(), Error> = match env::args().nth(1).unwrap().as_ref() {
-        "addPlaylistItem" => run_add_playlist_item,
-        "allOn" => run_all_on,
-        "allOff" => run_all_off,
-        "getPlaylist" => run_get_playlist,
+        "add-playlist-item" => run_add_playlist_item,
+        "allon" => run_all_on,
+        "alloff" => run_all_off,
+        "get-playlist" => run_get_playlist,
         "set" => run_set,
-        "rangeOn" => run_range_on,
-        "rangeOff" => run_range_off,
+        "rangeon" => run_range_on,
+        "rangeoff" => run_range_off,
         "run-show" => run_run_show,
         "update-data" => run_update_data,
         _ => panic!("Invalid first argument"),
@@ -150,17 +150,18 @@ fn run_run_show(args: Args) -> Result<(), Error> {
 }
 
 fn run_set(args: Args) -> Result<(), Error> {
-    println!("{:?}", args);
 
     let dmx_port = args.arg_dmx_port.unwrap();
     let dmx_chan = args.arg_dmx_chan.unwrap();
     
     let mut dmx = try!(DmxOutput::new(&dmx_port));
 
-    match env::args().nth(1).unwrap().as_ref() {
-        "on" => proton_runner::commands::range_on(&mut dmx, dmx_chan, dmx_chan),
-        "off" => proton_runner::commands::range_off(&mut dmx, dmx_chan, dmx_chan),
-        _ => Ok(println!("This will never happen"))
+    if args.cmd_on {
+        proton_runner::commands::range_on(&mut dmx, dmx_chan, dmx_chan)
+    } else if args.cmd_off {
+        proton_runner::commands::range_off(&mut dmx, dmx_chan, dmx_chan)
+    } else {
+        Ok(println!("This *should* never happen"))
     }
 }
 
