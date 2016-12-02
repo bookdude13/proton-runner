@@ -16,14 +16,15 @@ const USAGE: &'static str = "
 Command-line interface for Proton
 
 Usage:
-  ./proton_runner add-playlist-item <proj-name> <plist-idx> [--seq=<seq-path>] [--music=<music-path>] [--dur=<duration>]  ./proton_runner allon <dmx-port>
+  ./proton_runner add-playlist-item <proj-name> <plist-idx> [--seq=<seq-path>] [--music=<music-path>] [--dur=<duration>]
+  ./proton_runner allon <dmx-port>
   ./proton_runner alloff <dmx-port>
   ./proton_runner get-playlist <proj-name>
   ./proton_runner set <dmx-chan> (on | off) <dmx-port>
   ./proton_runner rangeon <chan-start> <chan-end> <dmx-port>
   ./proton_runner rangeoff <chan-start> <chan-end> <dmx-port>
   ./proton_runner remove-playlist-item <proj-name> <plist-idx>
-  ./proton_runner run-show <proj-name> <dmx-port>
+  ./proton_runner run-show <proj-name> <dmx-port> [<plist-offset>]
   ./proton_runner update-data <proj-name>
   ./proton_runner (-h | --help)
 
@@ -41,6 +42,7 @@ struct Args {
     arg_dmx_chan: Option<u32>,
     arg_dmx_port: Option<String>,
     arg_plist_idx: Option<u32>,
+    arg_plist_offset: Option<u32>,
     arg_proj_name: Option<String>,
     cmd_on: bool,
     cmd_off: bool,
@@ -144,7 +146,8 @@ fn run_run_show(args: Args) -> Result<(), Error> {
     // Prepare show
     let proj_name = args.arg_proj_name.unwrap();
     let dmx_port = args.arg_dmx_port.unwrap();
-    let show = try!(Show::new(&proj_name, &dmx_port));
+    let plist_offset = args.arg_plist_offset.unwrap_or(0);
+    let show = try!(Show::new(&proj_name, &dmx_port, plist_offset));
     println!("Ready!");
 
     // Wait for user to run

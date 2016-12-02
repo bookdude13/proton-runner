@@ -12,7 +12,8 @@ pub struct Show {
 }
 
 impl Show {
-    pub fn new(proj_name: &str, dmx_port: &str) -> Result<Show, Error> {
+    /// Creates a new show starting at playlist item at index offset, 0-indexed
+    pub fn new(proj_name: &str, dmx_port: &str, offset: u32) -> Result<Show, Error> {
         
         println!("Creating DMX outputter");
         // Create dmx outputter
@@ -31,6 +32,7 @@ impl Show {
         println!("Prepping the show");
         // Setup playlist items
         let prepped_show = plist.items.into_iter()
+            .skip(offset as usize)
             .map(|show_item| match show_item.prepare() {
                 Ok(prepped) => prepped,
                 Err(e) => { panic!(e); }
