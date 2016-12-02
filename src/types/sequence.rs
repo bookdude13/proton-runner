@@ -18,8 +18,8 @@ impl Sequence {
         // Create channels for clock thread tx/rx and termination
         let (clock_tx, clock_rx) = mpsc::channel();
         let (end_clock_tx, end_clock_rx) = mpsc::channel();
-        let (debug_tx, debug_rx) = mpsc::channel();
-        let (end_debug_tx, end_debug_rx) = mpsc::channel();
+        //let (debug_tx, debug_rx) = mpsc::channel();
+        //let (end_debug_tx, end_debug_rx) = mpsc::channel();
         
         // Re-sync music and sequence every x frames
         let check_frame = 50;
@@ -34,32 +34,32 @@ impl Sequence {
         let mut curr_frame = 0;
 
         // Separate thread for debugging I/O to prevent lag
-        let debug_thread = thread::spawn(move || {
-            loop {
-                // Check to see if told to terminate
-                match end_debug_rx.try_recv() {
-                    Ok(_) | Err(mpsc::TryRecvError::Disconnected) => {
-                        println!("Terminating.");
-                        break;
-                    }
-                    Err(mpsc::TryRecvError::Empty) => {}
-                }
+        // let debug_thread = thread::spawn(move || {
+        //     loop {
+        //         // Check to see if told to terminate
+        //         match end_debug_rx.try_recv() {
+        //             Ok(_) | Err(mpsc::TryRecvError::Disconnected) => {
+        //                 println!("Terminating.");
+        //                 break;
+        //             }
+        //             Err(mpsc::TryRecvError::Empty) => {}
+        //         }
 
-                // Print all messages in buffer
-                loop {
-                    match debug_rx.try_recv() {
-                        Ok(difference) => println!("Lag! Frame difference: {}", difference),
-                        Err(mpsc::TryRecvError::Disconnected) => {
-                            println!("Terminating.");
-                            return;
-                        }
-                        Err(mpsc::TryRecvError::Empty) => { break; }
-                    }
-                }
+        //         // Print all messages in buffer
+        //         loop {
+        //             match debug_rx.try_recv() {
+        //                 Ok(difference) => println!("Lag! Frame difference: {}", difference),
+        //                 Err(mpsc::TryRecvError::Disconnected) => {
+        //                     println!("Terminating.");
+        //                     return;
+        //                 }
+        //                 Err(mpsc::TryRecvError::Empty) => { break; }
+        //             }
+        //         }
 
-                thread::sleep(Duration::from_millis(1000));
-            }
-        });
+        //         thread::sleep(Duration::from_millis(1000));
+        //     }
+        // });
 
         let clock_thread = thread::spawn(move || {
             loop {
@@ -94,12 +94,14 @@ impl Sequence {
 
             // Sync every so often
             if frame % check_frame == 0 {
+
                 let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
                 if real_frame != curr_frame {
-                    match debug_tx.send(real_frame - curr_frame) {
-                        Ok(_) => {},
-                        Err(_) => println!("Error sending debug info")
-                    }
+
+                    // match debug_tx.send(real_frame - curr_frame) {
+                    //     Ok(_) => {},
+                    //     Err(_) => println!("Error sending debug info")
+                    // }
 
                     curr_frame = real_frame;
                 }
@@ -119,11 +121,11 @@ impl Sequence {
                     Err(_) => { println!("Clock already terminated."); }
                 };
 
-                // Tell debug thread to stop
-                match end_debug_tx.send(0) {
-                    Ok(_) => {},
-                    Err(_) => { println!("Debug thread already terminated."); }
-                };
+                // // Tell debug thread to stop
+                // match end_debug_tx.send(0) {
+                //     Ok(_) => {},
+                //     Err(_) => { println!("Debug thread already terminated."); }
+                // };
 
                 // Let clock thread exit cleanly (wait for it)
                 match clock_thread.join() {
@@ -132,10 +134,10 @@ impl Sequence {
                 };
 
                 // Let debug thread exit cleanly (wait for it)
-                match debug_thread.join() {
-                    Ok(_) => {},
-                    Err(e) => { println!("Debug thread panicked with error: {:?}", e); },
-                };
+                // match debug_thread.join() {
+                //     Ok(_) => {},
+                //     Err(e) => { println!("Debug thread panicked with error: {:?}", e); },
+                // };
 
 
                 // Done, so finish
