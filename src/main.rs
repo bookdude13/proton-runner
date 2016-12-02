@@ -16,6 +16,7 @@ const USAGE: &'static str = "
 Command-line interface for Proton
 
 Usage:
+  ./proton_runner addPlaylistItem <proj-name> <plist-idx> [--seq=<seq-path>] [--music=<music-path>] [--dur=<duration>]
   ./proton_runner allOn <dmx-port>
   ./proton_runner allOff <dmx-port>
   ./proton_runner getPlaylist <proj-name>
@@ -27,7 +28,10 @@ Usage:
   ./proton_runner (-h | --help)
 
 Options:
-  -h --help     Show this screen
+  --seq=<seq-path>      Path to playlist item's sequence data file (can be excluded)
+  --music=<music-path>  Path to playlist item's music file (in .ogg format, can be excluded)
+  --dur=<duration>      Duration of the playlist item in milliseconds
+  -h --help             Show this screen
 ";
 
 #[derive(Debug, RustcDecodable)]
@@ -38,7 +42,11 @@ struct Args {
     arg_dmx_port: Option<String>,
     arg_on: Option<bool>,
     arg_off: Option<bool>,
+    arg_plist_idx: Option<u32>,
     arg_proj_name: Option<String>,
+    flag_dur: Option<u32>,
+    flag_music: Option<String>,
+    flag_seq: Option<String>,
 }
 
 fn main() {
@@ -49,6 +57,7 @@ fn main() {
     // Below unwrap()'s are safe within Docopt's usage rules
 
     let command: fn(Args) -> Result<(), Error> = match env::args().nth(1).unwrap().as_ref() {
+        "addPlaylistItem" => run_add_playlist_item,
         "allOn" => run_all_on,
         "allOff" => run_all_off,
         "getPlaylist" => run_get_playlist,
@@ -65,6 +74,16 @@ fn main() {
         Ok(_) => println!("Worked!"),
         Err(e) => println!("{:?}", e.to_string()),
     };
+}
+
+fn run_add_playlist_item(args: Args) -> Result<(), Error> {
+    let proj_name = args.arg_proj_name.unwrap();
+    let plist_idx = args.arg_plist_idx.unwrap();
+    let seq_path = args.flag_seq;
+    let music_path = args.flag_music;
+    let duration = args.flag_dur;
+
+    Playlist::add_item(&proj_name, plist_idx, seq_path, music_path, duration)
 }
 
 fn run_all_on(args: Args) -> Result<(), Error> {

@@ -100,21 +100,14 @@ pub fn update_data(proj_name: &str) -> Result<(), Error> {
             None::<u32>));
         plist_items.push(plist_item);
     }
-    // Build playlist file path
-    let mut plist_path = "Playlists/".to_string();
-    plist_path.push_str(&proj_name);
-    plist_path.push_str(&".json");
-
     // Make playlist object
     let plist = Playlist {
+        name: proj_name.to_string(),
         items: plist_items
     };
 
-    // Write playlist to file
-    let plist_json = try!(json::encode(&plist).map_err(Error::JsonEncode));
-    try!(File::create(&plist_path)
-        .and_then(|mut f| f.write(plist_json.as_bytes()))
-        .map_err(Error::Io));
+    // Write playlist
+    try!(plist.write_to_file());
 
     Ok(())
 }
