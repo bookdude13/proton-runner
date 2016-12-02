@@ -6,6 +6,7 @@ pub mod commands;
 pub mod data;
 mod dmx_output;
 pub mod error;
+pub mod playlist;
 pub mod types;
 pub mod utils;
 

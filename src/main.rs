@@ -83,7 +83,7 @@ fn run_add_playlist_item(args: Args) -> Result<(), Error> {
     let music_path = args.flag_music;
     let duration = args.flag_dur;
 
-    Playlist::add_item(&proj_name, plist_idx, seq_path, music_path, duration)
+    proton_runner::playlist::add_item(&proj_name, plist_idx, seq_path, music_path, duration)
 }
 
 fn run_all_on(args: Args) -> Result<(), Error> {
