@@ -6,6 +6,8 @@ update:
 run:
 	@cp ../proton-cli/target/debug/proton ./proton_cli
 	@cargo run run-show asdf "/dev/ttyUSB0"
+test:
+	@cargo test
 allOn:
 	@cargo run allOn "/dev/ttyUSB0"
 allOff:
