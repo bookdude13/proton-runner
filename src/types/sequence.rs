@@ -66,8 +66,7 @@ impl Sequence {
             if frame % check_frame == 0 {
 
                 let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
-                if real_frame != curr_frame {
-                    
+                if real_frame != curr_frame {                    
                     curr_frame = real_frame;
                 }
             }
