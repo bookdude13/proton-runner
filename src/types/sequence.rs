@@ -18,15 +18,15 @@ impl Sequence {
         // Create channels for clock thread tx/rx and termination
         let (clock_tx, clock_rx) = mpsc::channel();
         let (end_clock_tx, end_clock_rx) = mpsc::channel();
-        
-        // Re-sync music and sequence every x frames
-        let check_frame = 50;
 
         // Spawn timer that ticks once per frame until all frames have been ticked
         let num_frames = data.num_frames;
         let frame_dur = data.frame_dur_ms as u64;
         let music_dur = music.get_duration().as_milliseconds();
         let music_frame_dur = music_dur as f32 / num_frames as f32;
+
+        // Re-sync music and sequence every 250 ms
+        let check_frame = (250_f32 / num_frames as f32).ceil() as u32;
 
         // Keep track of the frame currently being played (updated by clock and syncing)
         let mut curr_frame = 0;
