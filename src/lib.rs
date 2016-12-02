@@ -2,6 +2,7 @@ extern crate rustc_serialize;
 extern crate serial as rserial;
 extern crate sfml;
 
+pub mod commands;
 pub mod data;
 mod dmx_output;
 pub mod error;
