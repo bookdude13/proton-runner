@@ -26,18 +26,18 @@ pub fn load_sequence_data(path: &str) -> Result<SequenceData, Error> {
 }
 
 
-/// Transposes data from channel-major to frame-major
+/// Transposes data from channel-major to frame-major.
+/// Assuming rectangle vector
 pub fn transpose_data(data: Vec<Vec<u16>>) -> Result<Vec<Vec<u16>>, Error> {
     if data.len() == 0 || data[0].len() == 0 {
         Err(Error::EmptyData)
     } else {
         let num_frames = data[0].len();
         let num_channels = data.len();
-        println!("num_f: {}, num_ch: {}", num_frames, num_channels);
+        
         let mut transposed = vec![Vec::with_capacity(num_channels as usize); num_frames as usize];
         for channel_data in data.iter() {
             for (frame_idx, frame_data) in channel_data.iter().enumerate() {
-                // println!("cidx: {}, fidx: {}", chan_idx, frame_idx);
                 transposed[frame_idx].push(*frame_data);
             }
         }
