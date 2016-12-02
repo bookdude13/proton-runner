@@ -1,3 +1,4 @@
+use rustc_serialize::json;
 use sfml::audio;
 
 use DmxOutput;
@@ -22,6 +23,21 @@ pub struct PreparedPlaylistItem {
     pub data: Option<SequenceData>,
     pub music: Option<audio::Music>,
     pub duration: Option<u32>
+}
+
+impl Playlist {
+    pub fn get_playlist(proj_name: &str) -> Result<Playlist, Error> {
+        // Check that playlist exists
+        let mut playlist_path = String::from("Playlists/");
+        playlist_path.push_str(proj_name);
+        playlist_path.push_str(".json");
+
+        // Load playlist from file
+        let plist_json = try!(utils::file_as_string(&playlist_path));
+
+        // Return decoded project
+        json::decode(&plist_json).map_err(Error::JsonDecode)
+    }
 }
 
 impl PreparedPlaylistItem {

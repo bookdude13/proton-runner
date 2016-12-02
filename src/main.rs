@@ -9,7 +9,7 @@ use docopt::Docopt;
 
 use proton_runner::DmxOutput;
 use proton_runner::error::Error;
-use proton_runner::types::Show;
+use proton_runner::types::{Playlist, Show};
 
 
 const USAGE: &'static str = "
@@ -18,7 +18,8 @@ Command-line interface for Proton
 Usage:
   ./proton_runner allOn <dmx-port>
   ./proton_runner allOff <dmx-port>
-  ./proton_runner set <dmx-chan> (on|off) <dmx-port>
+  ./proton_runner getPlaylist <proj-name>
+  ./proton_runner set <dmx-chan> <(on|off)> <dmx-port>
   ./proton_runner rangeOn <chan-start> <chan-end> <dmx-port>
   ./proton_runner rangeOff <chan-start> <chan-end> <dmx-port>
   ./proton_runner run-show <proj-name> <dmx-port>
@@ -50,6 +51,7 @@ fn main() {
     let command: fn(Args) -> Result<(), Error> = match env::args().nth(1).unwrap().as_ref() {
         "allOn" => run_all_on,
         "allOff" => run_all_off,
+        "getPlaylist" => run_get_playlist,
         "set" => run_set,
         "rangeOn" => run_range_on,
         "rangeOff" => run_range_off,
@@ -79,6 +81,12 @@ fn run_all_off(args: Args) -> Result<(), Error> {
     let mut dmx = try!(DmxOutput::new(&dmx_port));
     
     proton_runner::commands::range_off(&mut dmx, 1, 512)
+}
+
+fn run_get_playlist(args: Args) -> Result<(), Error> {
+    let proj_name = args.arg_proj_name.unwrap();
+    let playlist = try!(Playlist::get_playlist(&proj_name));
+    Ok(println!("{:?}", playlist))
 }
 
 fn run_range_on(args: Args) -> Result<(), Error> {
