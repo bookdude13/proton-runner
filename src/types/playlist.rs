@@ -50,7 +50,7 @@ impl Playlist {
         if idx > self.items.len() {
             let end = self.items.len();
             // TODO: Make error
-            println!("Index cannot be past end of array. Changing index {} to {}", idx, end);
+            println!("Cannot insert past index=len(items). Changing index {} to {}", idx, end);
             Ok(self.items.insert(end, item))
         } else {
             Ok(self.items.insert(idx, item))
@@ -58,11 +58,11 @@ impl Playlist {
     }
 
     pub fn remove_item(&mut self, idx: usize) -> Result<(), Error> {
-        if idx > self.items.len() {
+        if idx >= self.items.len() {
             let end = self.items.len();
             // TODO: Make error
-            println!("Index cannot be past end of array. Changing index {} to {}", idx, end);
-            let _ = self.items.remove(end);
+            println!("Cannot remove index past end of list. Changing index {} to {}", idx, end-1);
+            let _ = self.items.remove(end - 1);
         } else {
             let _ = self.items.remove(idx);
         }

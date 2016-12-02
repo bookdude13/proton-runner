@@ -16,13 +16,13 @@ const USAGE: &'static str = "
 Command-line interface for Proton
 
 Usage:
-  ./proton_runner add-playlist-item <proj-name> <plist-idx> [--seq=<seq-path>] [--music=<music-path>] [--dur=<duration>]
-  ./proton_runner allon <dmx-port>
+  ./proton_runner add-playlist-item <proj-name> <plist-idx> [--seq=<seq-path>] [--music=<music-path>] [--dur=<duration>]  ./proton_runner allon <dmx-port>
   ./proton_runner alloff <dmx-port>
   ./proton_runner get-playlist <proj-name>
   ./proton_runner set <dmx-chan> (on | off) <dmx-port>
   ./proton_runner rangeon <chan-start> <chan-end> <dmx-port>
   ./proton_runner rangeoff <chan-start> <chan-end> <dmx-port>
+  ./proton_runner remove-playlist-item <proj-name> <plist-idx>
   ./proton_runner run-show <proj-name> <dmx-port>
   ./proton_runner update-data <proj-name>
   ./proton_runner (-h | --help)
@@ -64,6 +64,7 @@ fn main() {
         "set" => run_set,
         "rangeon" => run_range_on,
         "rangeoff" => run_range_off,
+        "remove-playlist-item" => run_remove_playlist_item,
         "run-show" => run_run_show,
         "update-data" => run_update_data,
         _ => panic!("Invalid first argument"),
@@ -130,6 +131,13 @@ fn run_range_off(args: Args) -> Result<(), Error> {
     let end = dmx_bounded(chan_end);
 
     proton_runner::commands::range_off(&mut dmx, start, end)
+}
+
+fn run_remove_playlist_item(args: Args) -> Result<(), Error> {
+    let proj_name = args.arg_proj_name.unwrap();
+    let plist_idx = args.arg_plist_idx.unwrap();
+    
+    proton_runner::playlist::remove_item(&proj_name, plist_idx)
 }
 
 fn run_run_show(args: Args) -> Result<(), Error> {
