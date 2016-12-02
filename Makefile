@@ -1,5 +1,7 @@
 all:
 	@cargo build
+copy:
+	@cp ../proton-cli/target/debug/proton ./proton_cli
 update:
 	@cp ../proton-cli/target/debug/proton ./proton_cli
 	@cargo run update-data asdf
