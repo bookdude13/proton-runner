@@ -4,7 +4,7 @@ use error::Error;
 use types::{PreparedPlaylistItem, SequenceData};
 use utils;
 
-#[derive(Debug, RustcDecodable, RustcEncodable)]
+#[derive(Clone, Debug, RustcDecodable, RustcEncodable)]
 pub struct PlaylistItem {
     pub path: Option<String>,
     pub music: Option<String>,

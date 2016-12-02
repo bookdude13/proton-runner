@@ -1,3 +1,4 @@
+use std::fmt;
 use std::fs::File;
 use std::io::Write;
 
@@ -12,6 +13,25 @@ use utils;
 pub struct Playlist {
     pub name: String,
     pub items: Vec<PlaylistItem>
+}
+
+impl fmt::Display for Playlist {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for item in self.items.iter().cloned() {
+            if item.path.is_some() && item.music.is_some() {
+                try!(write!(f, "Sequence: ({}, {})\n", item.path.unwrap(), item.music.unwrap()))
+            } else if item.path.is_some() {
+                try!(write!(f, "Pattern: {}\n", item.path.unwrap()))
+            } else if item.music.is_some() {
+                try!(write!(f, "Music: {}\n", item.music.unwrap()))
+            } else if item.duration.is_some() {
+                try!(write!(f, "Delay: {}\n", item.duration.unwrap()))
+            } else {
+                try!(write!(f, "Invalid playlist item\n"))
+            }
+        }
+        Ok(())
+    }
 }
 
 impl Playlist {

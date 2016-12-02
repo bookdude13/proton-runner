@@ -108,7 +108,7 @@ fn run_all_off(args: Args) -> Result<(), Error> {
 fn run_get_playlist(args: Args) -> Result<(), Error> {
     let proj_name = args.arg_proj_name.unwrap();
     let playlist = try!(Playlist::get_playlist(&proj_name));
-    Ok(println!("{:?}", playlist))
+    Ok(println!("{}", playlist))
 }
 
 fn run_range_on(args: Args) -> Result<(), Error> {
