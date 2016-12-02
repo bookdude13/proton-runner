@@ -48,6 +48,8 @@ impl DmxOutput {
             .map(|val| *val as u8)
             .collect::<Vec<u8>>();
 
+        println!("{:?}", &values_u8[0]);
+
         // Limit to 512 channels for now
         values_u8.truncate(512);
 
