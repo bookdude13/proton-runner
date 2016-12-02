@@ -56,8 +56,11 @@ pub fn check_path(path: &str) -> Result<(), Error> {
 
 /// Reads a file as a string.
 /// Wraps Read::read_to_string errors in proton_cli::Error
-pub fn file_as_string(path: &str) -> Result<String, Error> {
-    File::open(path)
+pub fn file_as_string<P: AsRef<Path>>(path: P) -> Result<String, Error> {
+    if !path.as_ref().exists() {
+        return Err(Error::PathNotFound(path.as_ref().to_str().expect("Path not valid UTF-8").to_string()));
+    }
+    File::open(path.as_ref())
         .and_then(|mut file| {
             let mut string = String::new();
             file.read_to_string(&mut string)
