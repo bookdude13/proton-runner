@@ -18,6 +18,7 @@ Command-line interface for Proton
 Usage:
   ./proton_runner allOn <dmx-port>
   ./proton_runner allOff <dmx-port>
+  ./proton_runner set <dmx-chan> (on|off) <dmx-port>
   ./proton_runner rangeOn <chan-start> <chan-end> <dmx-port>
   ./proton_runner rangeOff <chan-start> <chan-end> <dmx-port>
   ./proton_runner run-show <proj-name> <dmx-port>
@@ -32,7 +33,10 @@ Options:
 struct Args {
     arg_chan_start: Option<u32>,
     arg_chan_end: Option<u32>,
+    arg_dmx_chan: Option<u32>,
     arg_dmx_port: Option<String>,
+    arg_on: Option<bool>,
+    arg_off: Option<bool>,
     arg_proj_name: Option<String>,
 }
 
@@ -46,6 +50,7 @@ fn main() {
     let command: fn(Args) -> Result<(), Error> = match env::args().nth(1).unwrap().as_ref() {
         "allOn" => run_all_on,
         "allOff" => run_all_off,
+        "set" => run_set,
         "rangeOn" => run_range_on,
         "rangeOff" => run_range_off,
         "run-show" => run_run_show,
@@ -65,7 +70,7 @@ fn run_all_on(args: Args) -> Result<(), Error> {
     
     let mut dmx = try!(DmxOutput::new(&dmx_port));
     
-    proton_runner::commands::range_on(&mut dmx, 1, 255)
+    proton_runner::commands::range_on(&mut dmx, 1, 512)
 }
 
 fn run_all_off(args: Args) -> Result<(), Error> {
@@ -73,7 +78,7 @@ fn run_all_off(args: Args) -> Result<(), Error> {
     
     let mut dmx = try!(DmxOutput::new(&dmx_port));
     
-    proton_runner::commands::range_off(&mut dmx, 1, 255)
+    proton_runner::commands::range_off(&mut dmx, 1, 512)
 }
 
 fn run_range_on(args: Args) -> Result<(), Error> {
@@ -117,14 +122,29 @@ fn run_run_show(args: Args) -> Result<(), Error> {
     }
 }
 
+fn run_set(args: Args) -> Result<(), Error> {
+    println!("{:?}", args);
+
+    let dmx_port = args.arg_dmx_port.unwrap();
+    let dmx_chan = args.arg_dmx_chan.unwrap();
+    
+    let mut dmx = try!(DmxOutput::new(&dmx_port));
+
+    match env::args().nth(1).unwrap().as_ref() {
+        "on" => proton_runner::commands::range_on(&mut dmx, dmx_chan, dmx_chan),
+        "off" => proton_runner::commands::range_off(&mut dmx, dmx_chan, dmx_chan),
+        _ => Ok(println!("This will never happen"))
+    }
+}
+
 fn run_update_data(args: Args) -> Result<(), Error> {
     let proj_name = args.arg_proj_name.unwrap();
     proton_runner::data::update_data(&proj_name)
 }
 
-/// Bind value to range [1, 255]
+/// Bind value to range [1, 512]
 fn dmx_bounded(unbounded: u32) -> u32 {
     if unbounded < 1 { 1 }
-    else if unbounded > 255 { 255 }
+    else if unbounded > 512 { 512 }
     else { unbounded }
 }
