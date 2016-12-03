@@ -1,10 +1,28 @@
-0 midshow
-1 preshow
-2 ann 1
-3 jingle breaks
-4 feel good
-5 collide
-6 ann 2
-7 unicorn
-8 glory
-9 ann 3
+0	preshow
+1	ann 1
+2	jingle breaks
+3	feel good
+4	collide
+5	ann 2
+6	unicorn
+7	glory
+8	ann 3
+9	midshow
+10	ann 1
+11	jingle breaks
+12	feel good
+13	collide
+14	ann 2
+15	unicorn
+16	glory
+17	ann 3
+18	midshow
+19	ann 1
+20	jingle breaks
+21	feel good
+22	collide
+23	ann 2
+24	unicorn
+25	glory
+26	ann 3
+27	preshow
