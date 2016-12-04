@@ -41,11 +41,13 @@ impl Playlist {
 
         // Write playlist to file
         let plist_json = try!(json::encode(self).map_err(Error::JsonEncode));
-        let _ = try!(File::create(&plist_path)
-            .and_then(|mut f| f.write(plist_json.as_bytes()))
-            .map_err(Error::Io));
-
-        Ok(())
+        File::create(&plist_path)
+            .and_then(|mut f| {
+                let _ = f.write(plist_json.as_bytes());
+                f.flush()
+            })
+            .and_then(|_| Ok(()))
+            .map_err(Error::Io)
     }
 
     fn get_path<'a>(proj_name: &'a str) -> String {
@@ -67,17 +69,22 @@ impl Playlist {
     }
 
     pub fn insert_item(&mut self, idx: usize, item: PlaylistItem) -> Result<(), Error> {
+        // Insert item
         if idx > self.items.len() {
             let end = self.items.len();
             // TODO: Make error
             println!("Cannot insert past index=len(items). Changing index {} to {}", idx, end);
-            Ok(self.items.insert(end, item))
+            self.items.insert(end, item);
         } else {
-            Ok(self.items.insert(idx, item))
+            self.items.insert(idx, item);
         }
+
+        // Write updated playlist to file
+        self.write_to_file()
     }
 
     pub fn remove_item(&mut self, idx: usize) -> Result<(), Error> {
+        // Remove item
         if idx >= self.items.len() {
             let end = self.items.len();
             // TODO: Make error
@@ -86,6 +93,8 @@ impl Playlist {
         } else {
             let _ = self.items.remove(idx);
         }
-        Ok(())
+
+        // Write updated playlist to file
+        self.write_to_file()
     }
 }
