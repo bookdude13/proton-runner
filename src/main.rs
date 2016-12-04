@@ -94,7 +94,7 @@ fn run_all_on(args: Args) -> Result<(), Error> {
     
     let mut dmx = try!(DmxOutput::new(&dmx_port));
     
-    proton_runner::commands::range_on(&mut dmx, 1, 512)
+    proton_runner::commands::all_on(&mut dmx)
 }
 
 fn run_all_off(args: Args) -> Result<(), Error> {
@@ -102,7 +102,7 @@ fn run_all_off(args: Args) -> Result<(), Error> {
     
     let mut dmx = try!(DmxOutput::new(&dmx_port));
     
-    proton_runner::commands::range_off(&mut dmx, 1, 512)
+    proton_runner::commands::all_off(&mut dmx)
 }
 
 fn run_get_playlist(args: Args) -> Result<(), Error> {
