@@ -100,6 +100,7 @@ pub fn update_data(proj_name: &str) -> Result<(), Error> {
             None::<u32>));
         plist_items.push(plist_item);
     }
+
     // Make playlist object
     let plist = Playlist {
         name: proj_name.to_string(),

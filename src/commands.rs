@@ -26,3 +26,11 @@ pub fn range_off(dmx: &mut DmxOutput, start: u32, end: u32) -> Result<(), Error>
 
     dmx.send(&data)
 }
+
+pub fn all_on(dmx: &mut DmxOutput) -> Result<(), Error> {
+    commands::range_on(&mut dmx, 1, 512)
+}
+
+pub fn all_off(dmx: &mut DmxOutput) -> Result<(), Error> {
+    commands::range_off(&mut dmx, 1, 512)
+}
