@@ -1,9 +1,11 @@
 use sfml::audio;
 use sfml::system::{Time, sleep};
 
+use commands;
 use DmxOutput;
 use error::Error;
 use utils;
+
 
 pub struct Music {
     music: audio::Music
@@ -11,9 +13,11 @@ pub struct Music {
 
 impl Music {
 
-    pub fn run(music: &mut audio::Music) -> Result<(), Error> {
+    pub fn run(dmx: &mut DmxOutput, music: &mut audio::Music) -> Result<(), Error> {
 
         println!("Playing music");
+
+        try!(commands::all_off(dmx));
 
         // Play music
         music.play();

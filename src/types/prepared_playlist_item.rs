@@ -17,9 +17,9 @@ impl PreparedPlaylistItem {
         } else if self.data.is_some() {
             Pattern::run(dmx, &self.data.unwrap())
         } else if self.music.is_some() {
-            Music::run(&mut self.music.unwrap())
+            Music::run(dmx, &mut self.music.unwrap())
         } else {
-            Delay::run(self.duration.unwrap())
+            Delay::run(dmx, self.duration.unwrap())
         }
     }
 }
