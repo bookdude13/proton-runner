@@ -17,15 +17,15 @@ pub struct Playlist {
 
 impl fmt::Display for Playlist {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for item in self.items.iter().cloned() {
+        for (i, item) in self.items.iter().cloned().enumerate() {
             if item.path.is_some() && item.music.is_some() {
-                try!(write!(f, "Sequence: ({}, {})\n", item.path.unwrap(), item.music.unwrap()))
+                try!(write!(f, "({}) Sequence: ({}, {})\n", i, item.path.unwrap(), item.music.unwrap()))
             } else if item.path.is_some() {
-                try!(write!(f, "Pattern: {}\n", item.path.unwrap()))
+                try!(write!(f, "({}) Pattern: {}\n", i, item.path.unwrap()))
             } else if item.music.is_some() {
-                try!(write!(f, "Music: {}\n", item.music.unwrap()))
+                try!(write!(f, "({}) Music: {}\n", i, item.music.unwrap()))
             } else if item.duration.is_some() {
-                try!(write!(f, "Delay: {}\n", item.duration.unwrap()))
+                try!(write!(f, "({}) Delay: {}\n", i, item.duration.unwrap()))
             } else {
                 try!(write!(f, "Invalid playlist item\n"))
             }
