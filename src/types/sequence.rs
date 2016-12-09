@@ -1,5 +1,4 @@
 use sfml::audio;
-use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
@@ -15,61 +14,15 @@ impl Sequence {
     pub fn run(dmx: &mut DmxOutput, data: &SequenceData, music: &mut audio::Music) -> Result<(), Error> {
         println!("Running sequence");
 
-        // Create channels for clock thread tx/rx and termination
-        let (clock_tx, clock_rx) = mpsc::channel();
-        let (end_clock_tx, end_clock_rx) = mpsc::channel();
-
-        // Spawn timer that ticks once per frame until all frames have been ticked
         let num_frames = data.num_frames;
-        let frame_dur = data.frame_dur_ms as u64;
         let music_dur = music.get_duration().as_milliseconds();
         let music_frame_dur = music_dur as f32 / num_frames as f32;
-
-        // Re-sync music and sequence every 250 ms
-        let check_frame = (250_f32 / num_frames as f32).ceil() as u32;
-
-        // Keep track of the frame currently being played (updated by clock and syncing)
-        let mut curr_frame = 0;
-
-        let clock_thread = thread::spawn(move || {
-            loop {
-                // Check to see if told to terminate
-                match end_clock_rx.try_recv() {
-                    Ok(_) | Err(mpsc::TryRecvError::Disconnected) => {
-                        println!("Terminating.");
-                        break;
-                    }
-                    Err(mpsc::TryRecvError::Empty) => {}
-                }
-
-                // Tick curr_frame, dying if receiving end terminated
-                match clock_tx.send(curr_frame) {
-                    Ok(_) => {},
-                    Err(_) => { println!("Terminating."); }
-                };
-
-                // Sleep for frame duration
-                thread::sleep(Duration::from_millis(frame_dur));
-                
-                // Increment current frame
-                curr_frame += 1;
-            }
-        });
 
         // Play music
         music.play();
 
-        // Output every frame (assuming this takes less than frame_dur time)
-        for frame in clock_rx.iter() {
-
-            // Sync every so often
-            if frame % check_frame == 0 {
-
-                let real_frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
-                if real_frame != curr_frame {                    
-                    curr_frame = real_frame;
-                }
-            }
+        loop {            
+            let frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
 
             let d = &data.data[frame as usize];
             match dmx.send(d) {
@@ -78,24 +31,14 @@ impl Sequence {
             }
 
             // Stop when music done or past last frame
-            if music.get_status() == audio::SoundStatus::Stopped || curr_frame >= num_frames {
-                // Tell clock thread to stop
-                match end_clock_tx.send(0) {
-                    Ok(_) => {},
-                    Err(_) => { println!("Clock already terminated."); }
-                };
-
-                // Let clock thread exit cleanly (wait for it)
-                match clock_thread.join() {
-                    Ok(_) => {},
-                    Err(e) => { println!("Clock thread panicked with error: {:?}", e); },
-                };
-
-                // Done, so finish
-                return Ok(());
+            if music.get_status() == audio::SoundStatus::Stopped {
+                break;
             }
+
+            // Sleep for frame duration
+            thread::sleep(Duration::from_millis(10));
         }
-        
+
         println!("Done.");
         Ok(())
     }
