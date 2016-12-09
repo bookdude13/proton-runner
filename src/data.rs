@@ -29,9 +29,15 @@ fn get_data(proj_name: &str) -> Result<Vec<SequenceData>, Error> {
     }
     
     // Make sure data starts like JSON
-    let plist_data_json = str::from_utf8(&output.stdout).expect("Playlist data not valid UTF-8").trim();
+    let output_str = str::from_utf8(&output.stdout).expect("Playlist data not valid UTF-8").trim();
+    let outputs = output_str.split("PLAYLIST_DATA:::").collect::<Vec<&str>>();
+    if outputs.len() != 2 {
+        return Err(Error::ProtonCli("Invalid output returned from cli".to_string()));
+    }
+    let plist_data_json = outputs[1];
+
     if &plist_data_json[0..2] != "[{" {
-        return Err(Error::ProtonCli("Returned data not valid: ".to_string() + plist_data_json));
+        return Err(Error::ProtonCli("Returned data not valid".to_string()));
     }
 
     println!("Parse JSON...");
@@ -88,7 +94,9 @@ pub fn update_data(proj_name: &str) -> Result<(), Error> {
         });
 
         // Save sequence data to file
+        print!("Encoding sequence data...");
         let data_json = try!(json::encode(&sequence_data).map_err(Error::JsonEncode));
+        println!("sequence data encoded");
         try!(File::create(&seq_output_path)
             .and_then(|mut f| f.write(data_json.as_bytes()))
             .map_err(Error::Io));
@@ -107,6 +115,7 @@ pub fn update_data(proj_name: &str) -> Result<(), Error> {
         items: plist_items
     };
 
+    println!("Saving playlist...");
     // Write playlist
     try!(plist.write_to_file());
 

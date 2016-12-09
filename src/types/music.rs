@@ -13,11 +13,9 @@ pub struct Music {
 
 impl Music {
 
-    pub fn run(dmx: &mut DmxOutput, music: &mut audio::Music) -> Result<(), Error> {
+    pub fn run(music: &mut audio::Music) -> Result<(), Error> {
 
         println!("Playing music");
-
-        try!(commands::all_off(dmx));
 
         // Play music
         music.play();
