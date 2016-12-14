@@ -24,10 +24,12 @@ impl Sequence {
         loop {            
             let frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
 
-            let d = &data.data[frame as usize];
-            match dmx.send(d) {
-                Ok(_) => (),
-                Err(e) => println!("\tError: {}", e),
+            if frame < num_frames {
+                let d = &data.data[frame as usize];
+                match dmx.send(d) {
+                    Ok(_) => (),
+                    Err(e) => println!("\tError: {}", e),
+                }
             }
 
             // Stop when music done or past last frame
@@ -36,7 +38,7 @@ impl Sequence {
             }
 
             // Sleep for frame duration
-            thread::sleep(Duration::from_millis(10));
+            thread::sleep(Duration::from_millis(15));
         }
 
         println!("Done.");
