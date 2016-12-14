@@ -11,8 +11,8 @@ run1:
 	@cargo run run-show show2016 "/dev/ttyUSB1"
 test:
 	@cargo test
-allOn:
-	@cargo run allOn "/dev/ttyUSB0"
-allOff:
-	@cargo run allOff "/dev/ttyUSB0"
+on:
+	@cargo run allon "/dev/ttyUSB0"
+off:
+	@cargo run alloff "/dev/ttyUSB0"
 
