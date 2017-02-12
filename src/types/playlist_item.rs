@@ -28,24 +28,20 @@ impl PlaylistItem {
         }
     }
 
-    pub fn to_runnable(&mut self) -> Box<Runnable> {
+    pub fn to_runnable(&mut self) -> Result<Box<Runnable>, Error> {
         let me = self.clone();
         if me.path.is_some() && me.music.is_some() {
-            let mut runnable = Sequence::new(me.path.unwrap(), me.music.unwrap());
-            runnable.prepare().expect("Error preparing runnable");
-            Box::new(runnable)
+            let runnable = try!(Sequence::new(me.path.unwrap(), me.music.unwrap()));
+            Ok(Box::new(runnable))
         } else if me.path.is_some() {
-            let mut runnable = Pattern::new(me.path.unwrap());
-            runnable.prepare().expect("Error preparing runnable");
-            Box::new(runnable)
+            let runnable = try!(Pattern::new(me.path.unwrap()));
+            Ok(Box::new(runnable))
         } else if me.music.is_some() {
-            let mut runnable = Music::new(me.music.unwrap());
-            runnable.prepare().expect("Error preparing runnable");
-            Box::new(runnable)
+            let runnable = try!(Music::new(me.music.unwrap()));
+            Ok(Box::new(runnable))
         } else {
-            let mut runnable = Delay::new(me.duration.unwrap());
-            runnable.prepare().expect("Error preparing runnable");
-            Box::new(runnable)
+            let runnable = try!(Delay::new(me.duration.unwrap()));
+            Ok(Box::new(runnable))
         }
     }
 }

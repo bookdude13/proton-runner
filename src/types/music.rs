@@ -1,30 +1,44 @@
+use sfml::audio;
+use sfml::system::{Time, sleep};
 
 use DmxOutput;
 use error::Error;
 use types::Runnable;
 
 pub struct Music {
-	music_path: String
+	music: audio::Music
 }
 
 impl Music {
-	pub fn new(music_path: String) -> Music {
+	pub fn new(music_path: String) -> Result<Music, Error> {
 		// TODO check if path exists
+        let music = match audio::Music::new_from_file(&music_path) {
+            Some(mm) => mm,
+            None => return Err(Error::MusicError("Creating rsfml music object failed".to_string()))
+        };
 
-		Music {
-			music_path: music_path
-		}
+		Ok(Music {
+			music: music
+		})
 	}
 }
 
 impl Runnable for Music {
-	/// Prepare the playlist item for playing (load data into memory)
-	fn prepare(&mut self) -> Result<(), Error> {
-		Err(Error::TodoErr)
-	}
-
 	/// Run the playlist item
-	fn run(&self, dmx: &mut DmxOutput) -> Result<(), Error> {
-		Err(Error::TodoErr)
+	#[allow(unused_variables)]
+	fn run(self: Box<Self>, dmx: &mut DmxOutput) -> Result<(), Error> {
+		println!("Playing music");
+		let mut music = self.music;
+
+        // Play music
+        music.play();
+
+        // Loop until done playing
+        while music.get_status() == audio::SoundStatus::Playing {
+            // Leave some CPU time for other processes
+            sleep(Time::with_milliseconds(100));
+        }
+
+        Ok(())
 	}
 }

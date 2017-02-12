@@ -27,7 +27,10 @@ impl Show {
         // Setup playlist items
         let runnable_plist = plist.items.iter_mut()
             .skip(offset as usize)
-            .map(|mut plist_item| plist_item.to_runnable())
+            .map(|mut plist_item| match plist_item.to_runnable() {
+                Ok(r) => r,
+                Err(e) => panic!("{}", e)
+            })
             .collect::<Vec<Box<Runnable>>>();
         
         let show = Show {
