@@ -1,31 +1,30 @@
-use sfml::audio;
-use sfml::system::{Time, sleep};
 
-use commands;
 use DmxOutput;
 use error::Error;
-use utils;
-
+use types::Runnable;
 
 pub struct Music {
-    music: audio::Music
+	music_path: String
 }
 
 impl Music {
+	pub fn new(music_path: String) -> Music {
+		// TODO check if path exists
 
-    pub fn run(music: &mut audio::Music) -> Result<(), Error> {
+		Music {
+			music_path: music_path
+		}
+	}
+}
 
-        println!("Playing music");
+impl Runnable for Music {
+	/// Prepare the playlist item for playing (load data into memory)
+	fn prepare(&mut self) -> Result<(), Error> {
+		Err(Error::TodoErr)
+	}
 
-        // Play music
-        music.play();
-
-        // Loop until done playing
-        while music.get_status() == audio::SoundStatus::Playing {
-            // Leave some CPU time for other processes
-            sleep(Time::with_milliseconds(100));
-        }
-
-        Ok(())
-    }
+	/// Run the playlist item
+	fn run(&self, dmx: &mut DmxOutput) -> Result<(), Error> {
+		Err(Error::TodoErr)
+	}
 }

@@ -1,48 +1,30 @@
-use std::sync::mpsc;
-use std::thread;
-use std::time::Duration;
 
 use DmxOutput;
 use error::Error;
-use types::SequenceData;
-
+use types::Runnable;
 
 pub struct Pattern {
-    pattern: SequenceData
+	seq_path: String
 }
 
 impl Pattern {
-    
-    pub fn run(dmx: &mut DmxOutput, data: &SequenceData) -> Result<(), Error> {
+	pub fn new(seq_path: String) -> Pattern {
+		// TODO check if path exists
+		Pattern {
+			seq_path: seq_path
+		}
 
-        println!("Running pattern");
+	}
+}
 
-        // Create channels for clock thread tx/rx
-        let (tx, rx) = mpsc::channel();
+impl Runnable for Pattern {
+	/// Prepare the playlist item for playing (load data into memory)
+	fn prepare(&mut self) -> Result<(), Error> {
+		Err(Error::TodoErr)
+	}
 
-        // Spawn timer that ticks once per frame until all frames have been ticked
-        let num_frames = data.num_frames;
-        let frame_dur = data.frame_dur_ms as u64;
-        let mut curr_frame = 0;
-        thread::spawn(move || {
-            while curr_frame != num_frames {
-                // TODO maybe map the unwrap error to Error type
-                tx.send(curr_frame).unwrap();
-                curr_frame += 1;
-                thread::sleep(Duration::from_millis(frame_dur));
-            }
-            
-        });
-
-        // Output every frame
-        for frame in rx.iter() {
-            let d = &data.data[frame as usize];
-            match dmx.send(d) {
-                Ok(_) => (),
-                Err(e) => println!("\tError: {}", e),
-            }
-        }
-        println!("Done.");
-        Ok(())
-    }
+	/// Run the playlist item
+	fn run(&self, dmx: &mut DmxOutput) -> Result<(), Error> {
+		Err(Error::TodoErr)
+	}
 }

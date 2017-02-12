@@ -109,7 +109,8 @@ pub fn update_data(cfg: &Config, proj_name: &str) -> Result<(), Error> {
             Some(seq_output_path),
             seq_music_path,
             None::<u32>));
-        plist_items.push(plist_item);
+        
+        plist_items.push(Box::new(plist_item));
     }
 
     // Make playlist object

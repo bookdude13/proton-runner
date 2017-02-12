@@ -1,23 +1,28 @@
-use std::thread;
-use std::time::Duration;
 
-use commands;
 use DmxOutput;
 use error::Error;
+use types::Runnable;
 
 pub struct Delay {
-    delay_ms: u64
+	duration: u32
 }
 
-
 impl Delay {
+	pub fn new(duration: u32) -> Delay {
+		Delay {
+			duration: duration
+		}
+	}
+}
 
-    pub fn run(dmx: &mut DmxOutput, delay_ms: u32) -> Result<(), Error> {
-    	println!("Playing delay");
+impl Runnable for Delay {
+	/// Prepare the playlist item for playing (load data into memory)
+	fn prepare(&mut self) -> Result<(), Error> {
+		Err(Error::TodoErr)
+	}
 
-    	try!(commands::all_off(dmx));
-        thread::sleep(Duration::from_millis(delay_ms as u64));
-        
-        Ok(())
-    }
+	/// Run the playlist item
+	fn run(&self, dmx: &mut DmxOutput) -> Result<(), Error> {
+		Err(Error::TodoErr)
+	}
 }

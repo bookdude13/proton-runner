@@ -1,47 +1,32 @@
-use sfml::audio;
-use std::thread;
-use std::time::Duration;
 
 use DmxOutput;
 use error::Error;
-use types::SequenceData;
+use types::Runnable;
 
-
-pub struct Sequence;
+pub struct Sequence {
+	seq_path: String,
+	music_path: String
+}
 
 impl Sequence {
+	pub fn new(seq_path: String, music_path: String) -> Sequence {
+		// TODO check if paths exist
+		Sequence {
+			seq_path: seq_path,
+			music_path: music_path
+		}
 
-    pub fn run(dmx: &mut DmxOutput, data: &SequenceData, music: &mut audio::Music) -> Result<(), Error> {
-        println!("Running sequence");
+	}
+}
 
-        let num_frames = data.num_frames;
-        let music_dur = music.get_duration().as_milliseconds();
-        let music_frame_dur = music_dur as f32 / num_frames as f32;
+impl Runnable for Sequence {
+	/// Prepare the playlist item for playing (load data into memory)
+	fn prepare(&mut self) -> Result<(), Error> {
+		Err(Error::TodoErr)
+	}
 
-        // Play music
-        music.play();
-
-        loop {            
-            let frame = (music.get_playing_offset().as_milliseconds() as f32 / music_frame_dur) as u32;
-
-            if frame < num_frames {
-                let d = &data.data[frame as usize];
-                match dmx.send(d) {
-                    Ok(_) => (),
-                    Err(e) => println!("\tError: {}", e),
-                }
-            }
-
-            // Stop when music done or past last frame
-            if music.get_status() == audio::SoundStatus::Stopped {
-                break;
-            }
-
-            // Sleep for frame duration
-            thread::sleep(Duration::from_millis(15));
-        }
-
-        println!("Done.");
-        Ok(())
-    }
+	/// Run the playlist item
+	fn run(&self, dmx: &mut DmxOutput) -> Result<(), Error> {
+		Err(Error::TodoErr)
+	}
 }
