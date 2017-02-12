@@ -1,6 +1,6 @@
 [package]
-name = "proton-runner"
-version = "0.0.1"
+name = "proton_runner"
+version = "0.0.5"
 authors = ["Ryan Fredlund <fredl027@umn.edu>", "Vladimir Kuksenko <kukse004@umn.edu>"]
 description = "Show runner for Proton"
 homepage = "https://github.com/teslaworksumn/proton-runner"
@@ -9,3 +9,10 @@ readme = "README.md"
 license = "MIT"
 
 [dependencies]
+docopt = "0.6.*"
+serial = "0.3.*"
+sfml = "0.11.*"
+rustc-serialize = "0.3.*"
+
+[[bin]]
+name = "proton_runner"
