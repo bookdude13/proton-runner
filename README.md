@@ -2,7 +2,13 @@
 Show runner for Proton
 
 # SFML/CSFML (and deps)
-proton-runner depends on rust-sfml. To get the external dependencies for rust-sfml in the right place, proton-runner sets up CSFML and SFML libraries when on Windows machines. Unix users should install libcsfml-dev and libsfml-dev using aptitude, homebrew, or any other package manager you are using.  
+proton-runner depends on rust-sfml. To setup dependencies, Unix users should install libcsfml-dev and libsfml-dev using aptitude, homebrew, or any other package manager you are using. Windows users should create the following environment variables:  
+------------
+|Name|Value|
+|CSFML_HOME|full/path/to/proton-runner/libs/CSFML|
+|SFML_HOME|full/path/to/proton-runner/libs/SFML|
+------------
+
 CSFML and SFML licenses are found in their corresponding subdirectories. Copies can also be found in licenses/. The only changes to the source have been deleting the include/ and doc/ folders for CSFML and the cmake, doc, examples, and include folders for SFML (done for space). Credit to Laurent Gomila for both libraries.
 
 # SSL
