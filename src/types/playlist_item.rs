@@ -34,7 +34,7 @@ impl PlaylistItem {
             Some(ref p) => match self.music {
                 Some(ref m) => {
                     let data = try!(utils::load_sequence_data(p));
-                    let music = match audio::Music::new_from_file(m) {
+                    let music = match audio::Music::from_file(m) {
                         Some(mm) => mm,
                         None => return Err(Error::MusicError("Creating rsfml music object failed".to_string()))
                     };
@@ -55,7 +55,7 @@ impl PlaylistItem {
             },
             None => match self.music {
                 Some(ref m) => {
-                    let music = match audio::Music::new_from_file(m) {
+                    let music = match audio::Music::from_file(m) {
                         Some(mm) => mm,
                         None => return Err(Error::MusicError("Creating rsfml music object failed".to_string()))
                     };
