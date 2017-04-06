@@ -12,8 +12,12 @@ license = "MIT"
 docopt = "0.6.*"
 rustc-serialize = "0.3.*"
 serial = "0.3.*"
-sfml = "0.11.*"
 toml = "0.2"
+
+[dependencies.sfml]
+version = "0.12.*"
+default-features = false
+features = ["audio"]
 
 [[bin]]
 name = "proton_runner"

@@ -1,5 +1,6 @@
 use sfml::audio;
-use sfml::system::{Time, sleep};
+use std::thread;
+use std::time::Duration;
 
 use DmxOutput;
 use error::Error;
@@ -12,7 +13,7 @@ pub struct Music {
 impl Music {
 	pub fn new(music_path: String) -> Result<Music, Error> {
 		// TODO check if path exists
-        let music = match audio::Music::new_from_file(&music_path) {
+        let music = match audio::Music::from_file(&music_path) {
             Some(mm) => mm,
             None => return Err(Error::MusicError("Creating rsfml music object failed".to_string()))
         };
@@ -34,9 +35,9 @@ impl Runnable for Music {
         music.play();
 
         // Loop until done playing
-        while music.get_status() == audio::SoundStatus::Playing {
+        while music.status() == audio::SoundStatus::Playing {
             // Leave some CPU time for other processes
-            sleep(Time::with_milliseconds(100));
+            thread::sleep(Duration::from_millis(15));
         }
 
         Ok(())
