@@ -11,15 +11,9 @@ proton-runner depends on rust-sfml. To setup dependencies, Unix users should ins
 |CSFML_HOME|full/path/to/proton-runner/libs/CSFML|
 |SFML_HOME|full/path/to/proton-runner/libs/SFML|
 
-<<<<<<< HEAD
 You may also need to add proton-runner/libs/CSFML/bin and proton-runner/libs/SFML/bin to your PATH variable in order to run proton-runner.
 
 CSFML and SFML licenses are found in their corresponding subdirectories. Copies can also be found in licenses/. The only changes to the source have been deleting the include/ and doc/ folders for CSFML and the cmake, doc, examples, and include folders for SFML (done for space). Credit to Laurent Gomila for both libraries. Using CSFML version 2.4 and SFML version 2.4.2
-=======
-You also may need to add proton-runner/libs/CSFML/bin and proton-runner/libs/SFML/bin to your PATH variable in order to run proton-runner.
-
-CSFML and SFML licenses are found in their corresponding subdirectories. Copies can also be found in licenses/. The only changes to the source have been deleting the include/ and doc/ folders for CSFML and the cmake, doc, examples, and include folders for SFML (done for space). Credit to Laurent Gomila for both libraries.
->>>>>>> master
 
 ## SSL
 proton-runner also depends on rust-openssl, which prompts the following notice:  
